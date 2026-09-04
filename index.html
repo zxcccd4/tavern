@@ -1,16 +1,20 @@
+<!-- CNAME: jinshanapi.cc.cd -->
 <!DOCTYPE html>
 <html lang="zh-CN">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#0f1013">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="format-detection" content="telephone=no">
+
     <title>SillyTavern</title>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-
     <style>
+        /* ═══════════════════════════════════════════════════════
+           【看门狗灰调极简质感 - 优化版】
+        ═══════════════════════════════════════════════════════ */
         :root {
             --bg-base: #0f1013;
             --grey-box: #1c1f24;
@@ -29,56 +33,37 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        html, body {
-            width: 100%;
-            height: 100%;
-            overflow-x: hidden;
+        html {
             background-color: var(--bg-base);
             color: var(--text-white);
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+            scroll-behavior: smooth;
         }
 
-        /* 📌【第一层：字符动画封面遮罩（去除了文字提示）】 */
-        #intro-overlay {
-            position: fixed;
-            inset: 0;
-            z-index: 9999;
-            background: #ffffff;
-            cursor: pointer;
-            transition: opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1), visibility 0.8s;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+        body {
+            min-height: 100vh;
+            min-height: 100dvh;
+            width: 100%;
+            overflow-x: hidden;
+            position: relative;
+            background: var(--bg-base);
         }
 
-        #introCanvas {
-            position: absolute;
-            inset: 0;
-            width: 100vw;
-            height: 100vh;
-        }
-
-        /* 点击淡出 */
-        #intro-overlay.fade-out {
-            opacity: 0;
-            visibility: hidden;
-            pointer-events: none;
-        }
-
-        /* 📌【第二层：主界面内容】 */
+        /* ─── 监视器扫描线 ─── */
         .scanlines {
             position: fixed;
             inset: 0;
             pointer-events: none;
             background: linear-gradient(
                 rgba(255, 255, 255, 0) 50%,
-                rgba(0, 0, 0, 0.4) 50%
+                rgba(0, 0, 0, 0.35) 50%
             );
             background-size: 100% 4px;
-            z-index: 999;
-            opacity: 0.75;
+            z-index: 10;
+            opacity: 0.6;
         }
 
+        /* ─── 背景呼吸动态特效 ─── */
         .ambient-breathing-layer {
             position: fixed;
             inset: 0;
@@ -95,8 +80,9 @@
             width: 360px;
             height: 360px;
             border-radius: 50%;
-            background: radial-gradient(circle, rgba(0, 240, 255, 0.14) 0%, rgba(30, 35, 48, 0.45) 50%, transparent 75%);
-            filter: blur(60px);
+            background: radial-gradient(circle, rgba(0, 240, 255, 0.12) 0%, rgba(30, 35, 48, 0.3) 50%, transparent 75%);
+            filter: blur(40px);
+            will-change: transform, opacity;
             animation: breathePulse1 6s infinite ease-in-out;
         }
 
@@ -108,19 +94,22 @@
             width: 420px;
             height: 320px;
             border-radius: 50%;
-            background: radial-gradient(circle, rgba(80, 95, 125, 0.22) 0%, rgba(18, 20, 26, 0.5) 60%, transparent 80%);
-            filter: blur(70px);
+            background: radial-gradient(circle, rgba(80, 95, 125, 0.18) 0%, rgba(18, 20, 26, 0.4) 60%, transparent 80%);
+            filter: blur(50px);
+            will-change: transform, opacity;
             animation: breathePulse2 8s infinite ease-in-out;
         }
 
         .grid-texture {
             position: absolute;
             inset: 0;
-            background-image: radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+            background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
             background-size: 20px 20px;
+            will-change: opacity;
             animation: gridBreathe 7s infinite ease-in-out;
         }
 
+        /* ─── 手机端主容器 ─── */
         .app-shell {
             position: relative;
             z-index: 2;
@@ -135,6 +124,7 @@
             gap: 18px;
         }
 
+        /* ─── 1. 顶部状态栏 ─── */
         .top-bar {
             display: flex;
             align-items: center;
@@ -144,6 +134,7 @@
             border: 1px solid var(--grey-border);
             border-left: 3px solid var(--accent-cyan);
             clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%);
+            user-select: none;
         }
 
         .bar-title {
@@ -171,6 +162,7 @@
             animation: dotBlink 1.8s infinite ease-in-out;
         }
 
+        /* ─── 2. 核心图片展示模块 ─── */
         .image-container-module {
             position: relative;
             background: var(--grey-box);
@@ -210,6 +202,7 @@
             display: block;
         }
 
+        /* ─── 3. 进入按钮 ─── */
         .enter-btn-wrapper {
             width: 100%;
         }
@@ -228,8 +221,10 @@
             text-decoration: none;
             color: var(--text-white);
             cursor: pointer;
-            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: all 0.2s ease;
             overflow: hidden;
+            user-select: none;
+            -webkit-user-select: none;
         }
 
         .watchdogs-enter-btn::before {
@@ -240,15 +235,20 @@
             width: 4px;
             height: 100%;
             background: var(--accent-cyan);
-            transition: width 0.25s ease;
+            transition: width 0.2s ease;
         }
 
-        .watchdogs-enter-btn:hover,
-        .watchdogs-enter-btn:active {
+        .watchdogs-enter-btn:hover {
             background: #2b313d;
             border-color: #fff;
             transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+        }
+
+        .watchdogs-enter-btn:active {
+            transform: scale(0.98);
+            background: #353a45;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
         }
 
         .watchdogs-enter-btn:hover::before {
@@ -268,11 +268,11 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 26px;
-            height: 26px;
+            width: 28px;
+            height: 28px;
             background: rgba(255, 255, 255, 0.08);
             border: 1px solid rgba(255, 255, 255, 0.15);
-            transition: all 0.25s ease;
+            transition: all 0.2s ease;
             z-index: 2;
         }
 
@@ -283,22 +283,35 @@
         }
 
         .bottom-reserve-space {
-            height: 40px;
+            height: 20px;
         }
 
+        /* ─── Keyframes ─── */
         @keyframes breathePulse1 {
-            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.55; }
-            50% { transform: translate(-50%, -50%) scale(1.35); opacity: 0.95; }
+            0%, 100% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 0.55;
+            }
+            50% {
+                transform: translate(-50%, -50%) scale(1.25);
+                opacity: 0.85;
+            }
         }
 
         @keyframes breathePulse2 {
-            0%, 100% { transform: translate(-50%, 50%) scale(1.2); opacity: 0.8; }
-            50% { transform: translate(-50%, 50%) scale(0.85); opacity: 0.35; }
+            0%, 100% {
+                transform: translate(-50%, 50%) scale(1.15);
+                opacity: 0.7;
+            }
+            50% {
+                transform: translate(-50%, 50%) scale(0.9);
+                opacity: 0.3;
+            }
         }
 
         @keyframes gridBreathe {
-            0%, 100% { opacity: 0.35; }
-            50% { opacity: 0.75; }
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.6; }
         }
 
         @keyframes dotBlink {
@@ -306,28 +319,23 @@
             50% { opacity: 0.3; }
         }
     </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/simplex-noise/2.4.0/simplex-noise.min.js"></script>
 </head>
 
 <body>
-    <!-- 📌 修改这里的 src 路径为你导出的视频名称（例如 my_video.webm） -->
-    <video id="sourceVideo" src="my_video.webm" loop muted playsinline></video>
-
-    <!-- 第一层：遮罩纯展示字符，无提示字 -->
-    <div id="intro-overlay">
-        <canvas id="introCanvas"></canvas>
-    </div>
-
-    <!-- 第二层：主界面 -->
+    <!-- 监视器扫描线 -->
     <div class="scanlines"></div>
 
+    <!-- 呼吸感动态背景层 -->
     <div class="ambient-breathing-layer">
         <div class="breath-orb-1"></div>
         <div class="breath-orb-2"></div>
         <div class="grid-texture"></div>
     </div>
 
+    <!-- 手机端主内容 -->
     <div class="app-shell">
+
+        <!-- 顶部简洁条 -->
         <div class="top-bar">
             <span class="bar-title">TAVERN</span>
             <div class="bar-status">
@@ -336,6 +344,7 @@
             </div>
         </div>
 
+        <!-- 核心图片展示 (900x696 比例) -->
         <div class="image-container-module">
             <div class="corner-mark c-tl"></div>
             <div class="corner-mark c-tr"></div>
@@ -343,10 +352,11 @@
             <div class="corner-mark c-br"></div>
 
             <div class="image-aspect-box">
-                <img src="3zhuye.jpg" alt="SillyTavern" class="main-character-img" onerror="this.src='3zhuye.jpg'">
+                <img src="3zhuye.jpg" alt="SillyTavern" class="main-character-img" loading="eager">
             </div>
         </div>
 
+        <!-- 核心进入按钮 -->
         <div class="enter-btn-wrapper">
             <a href="https://tavern.jinshanapi.cc.cd" class="watchdogs-enter-btn" target="_blank" rel="noopener noreferrer">
                 <span class="btn-text">SillyTavern</span>
@@ -360,110 +370,9 @@
         </div>
 
         <div class="bottom-reserve-space"></div>
+
     </div>
-
-    <script>
-        const CONFIG = {
-            mainChars: ['b', 'g', 'n', 'i'],
-            arrows: ['→', '↓', '←', '↑'],
-            targetCols: 130,
-            fontAspectRatio: 0.58,
-            lineHeightRatio: 0.85,
-            textColor: '#000000',
-            arrowColor: '#000000',
-            bgColor: '#ffffff',
-            darkThreshold: 135
-        };
-
-        const video = document.getElementById('sourceVideo');
-        const introCanvas = document.getElementById('introCanvas');
-        const ctx = introCanvas.getContext('2d');
-
-        const sampleCanvas = document.createElement('canvas');
-        const sampleCtx = sampleCanvas.getContext('2d', { willReadFrequently: true });
-        const simplex = new SimplexNoise();
-
-        let fontSize = 16, charWidth = 0, lineHeight = 0;
-        let cols = 0, rows = 0, time = 0;
-        let isAnimationActive = true;
-
-        function resize() {
-            introCanvas.width = window.innerWidth;
-            introCanvas.height = window.innerHeight;
-
-            charWidth = introCanvas.width / CONFIG.targetCols;
-            fontSize = Math.floor(charWidth / CONFIG.fontAspectRatio);
-            lineHeight = fontSize * CONFIG.lineHeightRatio;
-
-            cols = CONFIG.targetCols;
-            rows = Math.floor(introCanvas.height / lineHeight) || 1;
-
-            sampleCanvas.width = cols;
-            sampleCanvas.height = rows;
-        }
-
-        function renderFrame() {
-            if (!isAnimationActive) return;
-            requestAnimationFrame(renderFrame);
-
-            if (video.paused || video.ended || video.readyState < 2 || cols === 0 || rows === 0) return;
-
-            sampleCtx.drawImage(video, 0, 0, cols, rows);
-            const imgData = sampleCtx.getImageData(0, 0, cols, rows).data;
-
-            ctx.fillStyle = CONFIG.bgColor;
-            ctx.fillRect(0, 0, introCanvas.width, introCanvas.height);
-
-            ctx.font = `400 ${fontSize}px "Space Mono", monospace`;
-            ctx.textBaseline = 'top';
-
-            time += 0.0012;
-
-            for (let y = 0; y < rows; y++) {
-                for (let x = 0; x < cols; x++) {
-                    const index = (y * cols + x) * 4;
-                    if (index + 2 >= imgData.length) continue;
-
-                    const brightness = imgData[index] * 0.299 + imgData[index + 1] * 0.587 + imgData[index + 2] * 0.114;
-                    const drawX = x * charWidth;
-                    const drawY = y * lineHeight;
-
-                    if (brightness < CONFIG.darkThreshold) {
-                        const charIdx = Math.floor((brightness / CONFIG.darkThreshold) * (CONFIG.mainChars.length - 1));
-                        ctx.fillStyle = CONFIG.textColor;
-                        ctx.fillText(CONFIG.mainChars[charIdx], drawX, drawY);
-                    } else {
-                        const noiseVal = simplex.noise3D(x * 0.018, y * 0.018, time);
-                        let arrowIdx = Math.floor(((noiseVal + 1) / 2) * CONFIG.arrows.length);
-                        arrowIdx = Math.max(0, Math.min(arrowIdx, CONFIG.arrows.length - 1));
-
-                        ctx.fillStyle = CONFIG.arrowColor;
-                        ctx.fillText(CONFIG.arrows[arrowIdx], drawX, drawY);
-                    }
-                }
-            }
-        }
-
-        window.addEventListener('resize', resize);
-        video.addEventListener('loadedmetadata', resize);
-        video.addEventListener('play', () => {
-            resize();
-            requestAnimationFrame(renderFrame);
-        });
-
-        resize();
-        video.play().catch(() => { });
-
-        // 点击页面任意地方淡出
-        const overlay = document.getElementById('intro-overlay');
-        overlay.addEventListener('click', () => {
-            overlay.classList.add('fade-out');
-            setTimeout(() => {
-                isAnimationActive = false;
-                video.pause();
-            }, 800);
-        });
-    </script>
 </body>
 
+</html>
 </html>
